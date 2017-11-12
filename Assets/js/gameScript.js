@@ -170,12 +170,32 @@ Level.prototype.collisionDetection = function () {
     }
 };
 
+Level.prototype.bulletCollisionDetection = function (bulletArray, c, r, objectsArray) {
+    bulletArray.forEach(function (e, i, a) {
+        var place = ((e.getY()/32) * c) + (e.getX()/32);
+
+        if ( place < c || place >= (c * (r -1)) || place % c === 0 ){
+            e.destroy();
+        } else if (objectsArray[place]._status) {
+            e.destroy();
+            objectsArray[place]._status = false;
+        } else {
+            if (e.getDirection() === 1) { e.setY(-e.getVelocity()); }
+            else if (e.getDirection() === 2) { e.setY(e.getVelocity()); }
+            else if (e.getDirection() === 3) { e.setX(-e.getVelocity()); }
+            else if (e.getDirection() === 4) { e.setX(e.getVelocity()); }
+        }
+    });
+};
 
 Level.prototype.drawInField = function () {
     this._field.clearRect(0, 0, this._canvas.width, this._canvas.height); // This line clear the canvas every 10 ms
 
     this.drawObjectsInField();
     this._playerTank.draw(1, this._field);
+    this._playerTank.drawBullets(this._field);
+    this.bulletCollisionDetection(this._playerTank.getFiredBullets(), this._columns, this._rows, this._objectsArrayFill);
+    this._playerTank.removeDestroyedBullets();
     //this.drawBall();
     //this.drawPaddle();
     //this.collisionDetection();
@@ -191,6 +211,18 @@ Level.prototype.drawInField = function () {
         if (!coll.Down) { this._playerTank.setY(this._playerTank.getVelocity()); }
     } else if(this._playerTank.getUpPressed() && this._playerTank.getY() > this._spriteSize) {
         if (!coll.Up) { this._playerTank.setY(-this._playerTank.getVelocity()); }
+    }
+
+    if (this._playerTank.getSpacePressed()) {
+        if (this._playerTank.getBulletRightPressed()) {
+            this._playerTank.addFiredBullet(new Bullet(true, this._playerTank.getX(), this._playerTank.getY(), 32, 4));
+        } else if (this._playerTank.getBulletLeftPressed()) {
+            this._playerTank.addFiredBullet(new Bullet(true, this._playerTank.getX(), this._playerTank.getY(), 32, 3));
+        } else if (this._playerTank.getBulletUpPressed()) {
+            this._playerTank.addFiredBullet(new Bullet(true, this._playerTank.getX(), this._playerTank.getY(), 32, 1));
+        } else if (this._playerTank.getBulletDownPressed()) {
+            this._playerTank.addFiredBullet(new Bullet(true, this._playerTank.getX(), this._playerTank.getY(), 32, 2));
+        }
     }
 
 
@@ -219,9 +251,30 @@ function Tank(l, s, img, x, y, v) {
     this._x = x;
     this._y = y;
     this._velocity = v;
+    this._firedBullets = [];
 
     //throw new Error ("Can't instantiate an Abstract Class.");
 }
+
+Tank.prototype.addFiredBullet = function (value) {
+    this._firedBullets.push(value);
+};
+
+Tank.prototype.removeDestroyedBullets = function () {
+    this._firedBullets.forEach(function (e, i, a) {
+        if (!e.getStatus()) {
+            a.splice(i, 1);
+        }
+    });
+};
+
+Tank.prototype.drawBullets = function (ctx) {
+    this._firedBullets.forEach(function (e, i, a) {
+        if (e.getStatus()) {
+            e.draw(ctx);
+        }
+    });
+};
 
 Tank.prototype.getX = function () {
     return this._x;
@@ -235,14 +288,16 @@ Tank.prototype.getVelocity = function () {
     return this._velocity;
 };
 
+Tank.prototype.getFiredBullets = function () {
+    return this._firedBullets;
+};
+
 Tank.prototype.setX = function (value) {
     this._x += value;
-    //console.log(this._x);
 };
 
 Tank.prototype.setY = function (value) {
     this._y += value;
-    //console.log(this._y);
 };
 
 Tank.prototype.walk = function () {
@@ -309,6 +364,12 @@ function UserTank(l, s, img, x, y, v) {
     this._upPressed = false;
     this._downPressed = false;
     this._spacePressed = false;
+
+    this._bulletUpPressed = false;
+    this._bulletDownPressed = false;
+    this._bulletRightPressed = false;
+    this._bulletLeftPressed = false;
+
 }
 
 /**
@@ -319,49 +380,44 @@ UserTank.prototype = Object.create(Tank.prototype);
 
 UserTank.prototype.constructor = UserTank;  // Setting the 'constructor' property for UserTank references.
 
-UserTank.prototype.setRightPressed = function (value) {
-    this._rightPressed = value;
-};
+UserTank.prototype.setRightPressed = function (value) { this._rightPressed = value; };
 
-UserTank.prototype.setLeftPressed = function (value) {
-    this._leftPressed = value;
-};
+UserTank.prototype.setLeftPressed = function (value) { this._leftPressed = value; };
 
-UserTank.prototype.setUpPressed = function (value) {
-    this._upPressed = value;
-};
+UserTank.prototype.setUpPressed = function (value) { this._upPressed = value; };
 
-UserTank.prototype.setDownPressed = function (value) {
-    this._downPressed = value;
-};
+UserTank.prototype.setDownPressed = function (value) { this._downPressed = value; };
 
-UserTank.prototype.setSpacePressed = function (value) {
-    this._spacePressed = value;
-};
+UserTank.prototype.setSpacePressed = function (value) { this._spacePressed = value; };
 
-UserTank.prototype.getRightPressed = function () {
-    return this._rightPressed;
-};
+UserTank.prototype.setBulletUpPressed = function (value) { this._bulletUpPressed = value; };
 
-UserTank.prototype.getLeftPressed = function () {
-    return this._leftPressed;
-};
+UserTank.prototype.setBulletDownPressed = function (value) { this._bulletDownPressed = value; };
 
-UserTank.prototype.getUpPressed = function () {
-    return this._upPressed;
-};
+UserTank.prototype.setBulletRightPressed = function (value) { this._bulletRightPressed = value; };
 
-UserTank.prototype.getDownPressed = function () {
-    return this._downPressed;
-};
+UserTank.prototype.setBulletLeftPressed = function (value) { this._bulletLeftPressed = value; };
 
-UserTank.prototype.getSpacePressed = function () {
-    return this._spacePressed;
-}
+UserTank.prototype.getRightPressed = function () { return this._rightPressed; };
+
+UserTank.prototype.getLeftPressed = function () { return this._leftPressed; };
+
+UserTank.prototype.getUpPressed = function () { return this._upPressed; };
+
+UserTank.prototype.getDownPressed = function () { return this._downPressed; };
+
+UserTank.prototype.getSpacePressed = function () { return this._spacePressed; };
+
+UserTank.prototype.getBulletUpPressed = function () { return this._bulletUpPressed; };
+
+UserTank.prototype.getBulletDownPressed = function () { return this._bulletDownPressed; };
+
+UserTank.prototype.getBulletRightPressed = function () { return this._bulletRightPressed; };
+
+UserTank.prototype.getBulletLeftPressed = function () { return this._bulletLeftPressed; };
 
 UserTank.prototype.collisionDetection = function (c, r, objectArray, sprintSize) {
     var cont = 0;
-
     var placeTank = Math.round(((this._y / sprintSize) * c) + (this._x / sprintSize));
     var placeUp = placeTank - c;
     var placeDown = placeTank + c;
@@ -440,17 +496,13 @@ function Objective(l, s, img, x, y) {
     this._y = y;
 }
 
-Objective.prototype.getX = function () {
-    return this._x;
-};
+Objective.prototype.getX = function () { return this._x; };
 
-Objective.prototype.getY = function () {
-    return this._y;
-};
+Objective.prototype.getY = function () { return this._y; };
 
-Objective.prototype.getStatus = function () {
-    return this._status;
-};
+Objective.prototype.getStatus = function () { return this._status; };
+
+Objective.prototype.destroy = function () { this._status = false; };
 
 Objective.prototype.loseLife = function (hitSize) {
     this._life -= hitSize;
@@ -458,16 +510,10 @@ Objective.prototype.loseLife = function (hitSize) {
     console.log((this._status) ? "Losing life." : "Dead.");
 };
 
-Objective.prototype.destroy = function () {
-    this._status = false;
-};
-
 Objective.prototype.draw = function (sizeInPx, ctx) {
     if (this._status) {
         ctx.beginPath();
-        ctx.drawImage(this._objectSprint,
-            this._x * sizeInPx,
-            this._y * sizeInPx);
+        ctx.drawImage(this._objectSprint, this._x * sizeInPx, this._y * sizeInPx);
         ctx.fill();
         ctx.closePath();
     }
@@ -489,21 +535,13 @@ function Wall(s, img, x, y) {
     this._y = y;
 }
 
-Wall.prototype.getX = function () {
-    return this._x;
-};
+Wall.prototype.getX = function () { return this._x; };
 
-Wall.prototype.getY = function () {
-    return this._y;
-};
+Wall.prototype.getY = function () { return this._y; };
 
-Wall.prototype.getStatus = function () {
-    return this._status;
-};
+Wall.prototype.getStatus = function () { return this._status; };
 
-Wall.prototype.destroy = function () {
-    this._status = false;
-};
+Wall.prototype.destroy = function () { this._status = false; };
 
 Wall.prototype.draw = function (sizeInPx, ctx) {
     if (this._status) {
@@ -523,31 +561,50 @@ Wall.prototype.draw = function (sizeInPx, ctx) {
  *      @param {boolean} s shooted or not "true/false".
  *      @param {number} x position in columns.
  *      @param {number} y position in rows.
+ *      @param {number} v
+ *      @param {number} d direction
  */
-function Bullet(s, x ,y) {
+function Bullet(s, x, y, v, d) {
     this._status = s;
     this._x = x;
     this._y = y;
+    this._velocity = v;
+    this._direction = d;
 }
 
-Bullet.prototype.getX = function () {
-    return this._x;
+Bullet.prototype.setX = function (value) { this._x += value; };
+
+Bullet.prototype.setY = function (value) { this._y += value; };
+
+Bullet.prototype.getX = function () { return this._x; };
+
+Bullet.prototype.getY = function () { return this._y; };
+
+Bullet.prototype.getVelocity = function () { return this._velocity; };
+
+Bullet.prototype.getStatus = function () { return this._status; };
+
+Bullet.prototype.getDirection = function () { return this._direction; };
+
+Bullet.prototype.destroy = function () { this._status = false; };
+
+Bullet.prototype.draw = function (ctx) {
+    if (this._status) {
+        ctx.beginPath();
+        ctx.arc(this._x + 16, this._y + 16, 6, 0, Math.PI*2);
+        ctx.fillStyle = "#0095DD";
+        ctx.fill();
+        ctx.closePath();
+    }
 };
 
-Bullet.prototype.getY = function () {
-    return this._y;
-};
-
-Bullet.prototype.getStatus = function () {
-    return this._status;
-};
-
-Bullet.prototype.shootingCollision = function () {
-    if((this._x === Wall._x) && (this._y === Wall._y)){
-        Wall.prototype.destroy();
+Bullet.prototype.collision = function (wallInFront, sprintSize) {
+    if ((wallInFront.getX() <= this._x && this._x <= (wallInFront.getY() + sprintSize)) ||
+        (wallInFront.getY() <= this._y && this._y <= (wallInFront.getY() + sprintSize))) {
+        wallInFront.destroy();
         this._status = false;
     }
-}
+};
 
 /*------------------------------ End Bullet Class --------------------------------*/
 
@@ -561,7 +618,7 @@ var dx = -2;
 var dy = -2;
 
 var bulletRadius = 12;
-var bulletColor = #FFCE21;
+var bulletColor = "#FFCE21";
 var wallSize = 32;
 
 
@@ -600,28 +657,38 @@ function main() {
     level1.placePlayerTank();  // put the playerTank in place
 
     var keyDownHandler  = function (e) {
-        if (e.keyCode === 40) { downPressed = true; level1.getPlayerTank().setDownPressed(true); }
-        else if(e.keyCode === 39) { rightPressed = true; level1.getPlayerTank().setRightPressed(true); }
-        else if (e.keyCode === 38) { upPressed = true; level1.getPlayerTank().setUpPressed(true);}
-        else if(e.keyCode === 37) { leftPressed = true;  level1.getPlayerTank().setLeftPressed(true);}
-        else if(e.keyCode === 32) { spacePressed = true; level1.getPlayerTank().setSpacePressed(true); } 
+        if (e.keyCode === 40) { level1.getPlayerTank().setDownPressed(true); }
+        else if(e.keyCode === 39) { level1.getPlayerTank().setRightPressed(true); }
+        else if (e.keyCode === 38) { level1.getPlayerTank().setUpPressed(true); }
+        else if(e.keyCode === 37) { level1.getPlayerTank().setLeftPressed(true); }
+        else if (e.keyCode === 87) { level1.getPlayerTank().setBulletUpPressed(true); }
+        else if(e.keyCode === 83) { level1.getPlayerTank().setBulletDownPressed(true); }
+        else if (e.keyCode === 68) { level1.getPlayerTank().setBulletRightPressed(true); }
+        else if(e.keyCode === 65) { level1.getPlayerTank().setBulletLeftPressed(true); }
+        else if(e.keyCode === 32) { level1.getPlayerTank().setSpacePressed(true); }
     };
 
     var keyUpHandler = function (e) {
-        if (e.keyCode === 40) { downPressed = false; level1.getPlayerTank().setDownPressed(false); }
-        else if(e.keyCode === 39) { rightPressed = false;  level1.getPlayerTank().setRightPressed(false); }
-        else if (e.keyCode === 38) { upPressed = false;  level1.getPlayerTank().setUpPressed(false); }
-        else if(e.keyCode === 37) { leftPressed = false;  level1.getPlayerTank().setLeftPressed(false); }
-        else if(e.keyCode === 32) { spacePressed = false; level1.getPlayerTank().setSpacePressed(false);
-    };
-
-    var keySpaceHandler = function (e) {
-        if (e.keyCode === 32) { spacePressed = true; level1.getPlayerTank().setSpacePressed(true);}
+        if (e.keyCode === 40) { level1.getPlayerTank().setDownPressed(false); }
+        else if(e.keyCode === 39) { level1.getPlayerTank().setRightPressed(false); }
+        else if (e.keyCode === 38) { level1.getPlayerTank().setUpPressed(false); }
+        else if(e.keyCode === 37) { level1.getPlayerTank().setLeftPressed(false); }
+        else if (e.keyCode === 87) { level1.getPlayerTank().setBulletUpPressed(false); }
+        else if(e.keyCode === 83) { level1.getPlayerTank().setBulletDownPressed(false); }
+        else if (e.keyCode === 68) { level1.getPlayerTank().setBulletRightPressed(false); }
+        else if(e.keyCode === 65) { level1.getPlayerTank().setBulletLeftPressed(false); }
+        else if(e.keyCode === 32) { level1.getPlayerTank().setSpacePressed(false); }
     };
 
     document.addEventListener("keydown", keyDownHandler, false);
     document.addEventListener("keyup", keyUpHandler, false);
+
+    /*
+    var keySpaceHandler = function (e) {
+        if (e.keyCode === 32) { spacePressed = true; level1.getPlayerTank().setSpacePressed(true);}
+    };
     document.addEventListener("keyspace",keySpaceHandler, false);
+    */
 
 
     setInterval(function () {
