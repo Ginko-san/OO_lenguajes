@@ -565,10 +565,12 @@ Bullet.prototype.getStatus = function () {
     return this._status;
 };
 
-Bullet.prototype.shoot = function () {
-
+Bullet.prototype.shootingCollision = function () {
+    if((this._x === Wall._x) && (this._y === Wall._y)){
+        Wall.prototype.destroy();
+        this._status = false;
+    }
 }
-
 
 /*------------------------------ End Bullet Class --------------------------------*/
 
@@ -581,8 +583,8 @@ var y = 584;
 var dx = -2;
 var dy = -2;
 
-var ballRadius = 12;
-var ballColor = #FFCE21;
+var bulletRadius = 12;
+var bulletColor = #FFCE21;
 var wallSize = 32;
 
 
