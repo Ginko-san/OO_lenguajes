@@ -113,7 +113,7 @@ Level.prototype.placePlayerTank =  function () {
         var place = (y * this._columns) + x;
 
         if (!this._objectsArrayFill[place]._status) {
-            this._playerTank = new UserTank(3, true, playerTankImage, x * this._spriteSize, y * this._spriteSize, 1);
+            this._playerTank = new UserTank(3, true, playerTankImage, x * this._spriteSize, y * this._spriteSize, 32);
             this._playerTank.draw(1, this._field);
             break;
         }
@@ -178,34 +178,19 @@ Level.prototype.drawInField = function () {
     this._playerTank.draw(1, this._field);
     //this.drawBall();
     //this.drawPaddle();
-    this.collisionDetection();
+    //this.collisionDetection();
 
 
-    /*
-    if (x + dx < wallSize+ballRadius || x + dx > this._canvas.width-(wallSize+ballRadius)) {
-        dx = -dx;
-    }
-
-    if (y + dy < wallSize+ballRadius || y + dy > this._canvas.height-(wallSize+ballRadius)) {
-        dy = -dy;
-    }*/
-    /*
-    if(rightPressed && paddleX < this._canvas.width-(wallSize+paddleWidth)) {
-        paddleX += 7;
-    }
-    else if(leftPressed && paddleX > wallSize) {
-        paddleX -= 7;
-    }*/
     var coll = this._playerTank.collisionDetection(this._columns, this._rows, this._objectsArrayFill, this._spriteSize);
 
     if(this._playerTank.getRightPressed() && this._playerTank.getX() < this._canvas.width-(this._spriteSize * 2)) {
-        if (coll !== 4) { this._playerTank.setX(this._playerTank.getVelocity()); }
+        if (!coll.Right) { this._playerTank.setX(this._playerTank.getVelocity()); }
     } else if(this._playerTank.getLeftPressed() && this._playerTank.getX() > this._spriteSize) {
-        if (coll !== 3) { this._playerTank.setX(-this._playerTank.getVelocity()); }
+        if (!coll.Left) { this._playerTank.setX(-this._playerTank.getVelocity()); }
     } else if(this._playerTank.getDownPressed() && this._playerTank.getY() < this._canvas.height-(this._spriteSize * 2)) {
-        if (coll !== 2) { this._playerTank.setY(this._playerTank.getVelocity()); }
+        if (!coll.Down) { this._playerTank.setY(this._playerTank.getVelocity()); }
     } else if(this._playerTank.getUpPressed() && this._playerTank.getY() > this._spriteSize) {
-        if (coll !== 1) { this._playerTank.setY(-this._playerTank.getVelocity()); }
+        if (!coll.Up) { this._playerTank.setY(-this._playerTank.getVelocity()); }
     }
 
 
@@ -252,12 +237,12 @@ Tank.prototype.getVelocity = function () {
 
 Tank.prototype.setX = function (value) {
     this._x += value;
-    console.log(this._x);
+    //console.log(this._x);
 };
 
 Tank.prototype.setY = function (value) {
     this._y += value;
-    console.log(this._y);
+    //console.log(this._y);
 };
 
 Tank.prototype.walk = function () {
@@ -366,44 +351,36 @@ UserTank.prototype.getDownPressed = function () {
 };
 
 UserTank.prototype.collisionDetection = function (c, r, objectArray, sprintSize) {
-    var cont = c * r;
+    var cont = 0;
 
-    var placeTank = Math.floor(((this._y / sprintSize) * c) + (this._x / sprintSize));
+    var placeTank = Math.round(((this._y / sprintSize) * c) + (this._x / sprintSize));
     var placeUp = placeTank - c;
     var placeDown = placeTank + c;
     var placeRight = placeTank + 1;
     var placeLeft = placeTank - 1;
-    //console.log(placeTank);
-    //console.log("up: "+ placeUp + ", " + (placeTank - c));
+
+    var coll = { Up: false,
+                 Down: false,
+                 Left: false,
+                 Right: false,
+                 NoColl: false
+    };
 
     if (objectArray[placeUp]._status) {
-       if (this._y <= (objectArray[placeUp].getY()*sprintSize) + sprintSize) { return 1; }
+       if (this._y <= (objectArray[placeUp].getY()*sprintSize) + sprintSize) { coll.Up = true; cont++; }
     }
     if (objectArray[placeDown]._status) {
-        if (this._y >= (objectArray[placeDown].getY()*sprintSize)) { return 2; }
+        if (this._y + sprintSize >= (objectArray[placeDown].getY()*sprintSize)) { coll.Down = true; cont++; }
     }
     if (objectArray[placeLeft]._status) {
-        if (this._x <= (objectArray[placeLeft].getX()*sprintSize)+ sprintSize) { return 3; }
+        if (this._x <= (objectArray[placeLeft].getX()*sprintSize)+ sprintSize) { coll.Left = true; cont++; }
     }
     if (objectArray[placeRight]._status) {
-        if (this._x >= (objectArray[placeRight].getX()*sprintSize)) { return 4; }
+        if (this._x + sprintSize >= (objectArray[placeRight].getX()*sprintSize)) { coll.Right = true; cont++; }
     }
-    return 0;
+    if (cont === 0) { coll.NoColl = true; }
 
-    /*for (var i = 0; i < cont; i++) {
-        var objectToColl = objectArray[i];
-
-        if (objectToColl._status)
-        {
-            if (this._y < (objectToColl.getY()*sprintSize)+ sprintSize && this._y > (objectToColl.getY()*sprintSize)) {
-                this._upPressed = false;
-                this._downPressed = false;
-            } else if (this._x < (objectToColl.getX()*sprintSize)+ sprintSize && this._x > (objectToColl.getX()*sprintSize)) {
-                this._leftPressed = false;
-                this._rightPressed = false;
-            }
-        }
-    }*/
+    return coll;
 };
 
 
@@ -599,7 +576,7 @@ function main() {
 
     setInterval(function () {
         level1.drawInField();
-    }, 10);
+    }, 100);
 }
 
 main();

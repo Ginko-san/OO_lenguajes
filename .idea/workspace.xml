@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b71b5fa5-0061-4555-bc3a-1776bad3a093" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Assets/js/gameScript.js" afterPath="$PROJECT_DIR$/Assets/js/gameScript.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/index.html" afterPath="$PROJECT_DIR$/index.html" />
     </list>
@@ -21,8 +20,8 @@
       <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="408">
-              <caret line="50" column="67" lean-forward="false" selection-start-line="50" selection-start-column="67" selection-end-line="50" selection-end-column="67" />
+            <state relative-caret-position="594">
+              <caret line="42" column="63" lean-forward="false" selection-start-line="42" selection-start-column="60" selection-end-line="42" selection-end-column="63" />
               <folding>
                 <element signature="n#style#0;n#div#0;n#main#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
               </folding>
@@ -33,7 +32,7 @@
       <file leaf-file-name="cover.css" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Assets/css/cover.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="18">
+            <state relative-caret-position="-1540">
               <caret line="49" column="18" lean-forward="false" selection-start-line="49" selection-start-column="18" selection-end-line="49" selection-end-column="18" />
               <folding />
             </state>
@@ -43,14 +42,14 @@
       <file leaf-file-name="gameScript.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Assets/js/gameScript.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="565">
-              <caret line="194" column="5" lean-forward="true" selection-start-line="194" selection-start-column="5" selection-end-line="194" selection-end-column="5" />
+            <state relative-caret-position="620">
+              <caret line="250" column="0" lean-forward="true" selection-start-line="250" selection-start-column="0" selection-end-line="250" selection-end-column="0" />
               <folding>
                 <element signature="e#1088#1184#0" expanded="false" />
                 <element signature="e#1473#1535#0" expanded="false" />
                 <element signature="e#1605#1650#0" expanded="false" />
                 <element signature="e#1912#2154#0" expanded="false" />
-                <element signature="e#3424#3511#0" expanded="false" />
+                <element signature="e#3425#3512#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -78,9 +77,9 @@
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-1" />
-    <option name="y" value="-11" />
+    <option name="y" value="-4" />
     <option name="width" value="1922" />
-    <option name="height" value="1092" />
+    <option name="height" value="1085" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -174,15 +173,15 @@
       <workItem from="1510191036194" duration="4461000" />
       <workItem from="1510244962540" duration="9886000" />
       <workItem from="1510353251371" duration="31542000" />
-      <workItem from="1510445512944" duration="22252000" />
+      <workItem from="1510445512944" duration="34059000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="81810000" />
+    <option name="totallyTimeSpent" value="93617000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1" y="-11" width="1922" height="1092" extended-state="6" />
+    <frame x="-1" y="-4" width="1922" height="1085" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.140625" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -241,7 +240,7 @@
             <element signature="e#1473#1535#0" expanded="false" />
             <element signature="e#1605#1650#0" expanded="false" />
             <element signature="e#1912#2154#0" expanded="false" />
-            <element signature="e#3424#3511#0" expanded="false" />
+            <element signature="e#3425#3512#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -273,7 +272,7 @@
             <element signature="e#1473#1535#0" expanded="false" />
             <element signature="e#1605#1650#0" expanded="false" />
             <element signature="e#1912#2154#0" expanded="false" />
-            <element signature="e#3424#3511#0" expanded="false" />
+            <element signature="e#3425#3512#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -305,7 +304,7 @@
             <element signature="e#1473#1535#0" expanded="false" />
             <element signature="e#1605#1650#0" expanded="false" />
             <element signature="e#1912#2154#0" expanded="false" />
-            <element signature="e#3424#3511#0" expanded="false" />
+            <element signature="e#3425#3512#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -337,7 +336,7 @@
             <element signature="e#1473#1535#0" expanded="false" />
             <element signature="e#1605#1650#0" expanded="false" />
             <element signature="e#1912#2154#0" expanded="false" />
-            <element signature="e#3424#3511#0" expanded="false" />
+            <element signature="e#3425#3512#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -361,7 +360,7 @@
             <element signature="e#1473#1535#0" expanded="false" />
             <element signature="e#1605#1650#0" expanded="false" />
             <element signature="e#1912#2154#0" expanded="false" />
-            <element signature="e#3424#3511#0" expanded="false" />
+            <element signature="e#3425#3512#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -370,14 +369,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Assets/css/cover.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="49" column="18" lean-forward="false" selection-start-line="49" selection-start-column="18" selection-end-line="49" selection-end-column="18" />
           <folding />
         </state>
       </provider>
@@ -417,10 +408,18 @@
         <state />
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Assets/css/cover.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1540">
+          <caret line="49" column="18" lean-forward="false" selection-start-line="49" selection-start-column="18" selection-end-line="49" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="408">
-          <caret line="50" column="67" lean-forward="false" selection-start-line="50" selection-start-column="67" selection-end-line="50" selection-end-column="67" />
+        <state relative-caret-position="594">
+          <caret line="42" column="63" lean-forward="false" selection-start-line="42" selection-start-column="60" selection-end-line="42" selection-end-column="63" />
           <folding>
             <element signature="n#style#0;n#div#0;n#main#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
           </folding>
@@ -429,14 +428,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Assets/js/gameScript.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="565">
-          <caret line="194" column="5" lean-forward="true" selection-start-line="194" selection-start-column="5" selection-end-line="194" selection-end-column="5" />
+        <state relative-caret-position="620">
+          <caret line="250" column="0" lean-forward="true" selection-start-line="250" selection-start-column="0" selection-end-line="250" selection-end-column="0" />
           <folding>
             <element signature="e#1088#1184#0" expanded="false" />
             <element signature="e#1473#1535#0" expanded="false" />
             <element signature="e#1605#1650#0" expanded="false" />
             <element signature="e#1912#2154#0" expanded="false" />
-            <element signature="e#3424#3511#0" expanded="false" />
+            <element signature="e#3425#3512#0" expanded="false" />
           </folding>
         </state>
       </provider>
