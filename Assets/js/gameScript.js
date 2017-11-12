@@ -193,17 +193,7 @@ Level.prototype.drawInField = function () {
         if (!coll.Up) { this._playerTank.setY(-this._playerTank.getVelocity()); }
     }
 
-    if (this._playerTank.getSpacePressed()) {
-        if (this._playerTank.getRightPressed()) {
-            this._playerTank.addFiredBullet(new Bullet(true, ));
-        } else if (this._playerTank.getLeftPressed()) {
 
-        } else if (this._playerTank.getUpPressed()) {
-
-        } else if (this._playerTank.getDownPressed()) {
-
-        }
-    }
 
     //x += dx;
     //y += dy;
@@ -229,38 +219,9 @@ function Tank(l, s, img, x, y, v) {
     this._x = x;
     this._y = y;
     this._velocity = v;
-    this._firedBullets = [];
 
     //throw new Error ("Can't instantiate an Abstract Class.");
 }
-
-Tank.prototype.addFiredBullet = function (value) {
-    this._firedBullets.push(value);
-};
-
-Tank.prototype.removeDestroyedBullets= function () {
-    this._firedBullets.forEach(function (e, i, a) {
-        if (!e.getStatus()) {
-            a.splice(i, 1);
-        }
-    });
-};
-
-Tank.prototype.drawBullets = function (sizeInPx, ctx) {
-    this._firedBullets.forEach(function (e, i, a) {
-        if (e.getStatus()) {
-            ctx.beginPath();
-            ctx.drawImage(this._objectSprint,
-                this._x * sizeInPx,
-                this._y * sizeInPx);
-
-            ctx.arc(e.getX(), e.getY(), 6, 0, Math.PI*2);
-            ctx.fillStyle = "#0095DD";
-            ctx.fill();
-            ctx.closePath();
-        }
-    });
-};
 
 Tank.prototype.getX = function () {
     return this._x;
@@ -396,7 +357,7 @@ UserTank.prototype.getDownPressed = function () {
 
 UserTank.prototype.getSpacePressed = function () {
     return this._spacePressed;
-};
+}
 
 UserTank.prototype.collisionDetection = function (c, r, objectArray, sprintSize) {
     var cont = 0;
@@ -562,24 +523,12 @@ Wall.prototype.draw = function (sizeInPx, ctx) {
  *      @param {boolean} s shooted or not "true/false".
  *      @param {number} x position in columns.
  *      @param {number} y position in rows.
- *      @param {number} v
- *      @param {number} cF
  */
-function Bullet(s, x ,y , v, cF) {
+function Bullet(s, x ,y) {
     this._status = s;
     this._x = x;
     this._y = y;
-    this._velocity = v;
-    this._comeFrom = cF;
 }
-
-Bullet.prototype.setX = function (value) {
-    this._x = value;
-};
-
-Bullet.prototype.setY = function (value) {
-    this._y = value;
-};
 
 Bullet.prototype.getX = function () {
     return this._x;
@@ -589,21 +538,16 @@ Bullet.prototype.getY = function () {
     return this._y;
 };
 
-Bullet.prototype.getVelocity = function () {
-    return this._velocity;
-};
-
 Bullet.prototype.getStatus = function () {
     return this._status;
 };
 
-Bullet.prototype.collision = function (wallInFront, sprintSize) {
-    if ((wallInFront.getX() <= this._x && this._x <= (wallInFront.getY() + sprintSize)) ||
-        (wallInFront.getY() <= this._y && this._y <= (wallInFront.getY() + sprintSize))) {
-        wallInFront.destroy();
+Bullet.prototype.shootingCollision = function () {
+    if((this._x === Wall._x) && (this._y === Wall._y)){
+        Wall.prototype.destroy();
         this._status = false;
     }
-};
+}
 
 /*------------------------------ End Bullet Class --------------------------------*/
 
@@ -617,7 +561,7 @@ var dx = -2;
 var dy = -2;
 
 var bulletRadius = 12;
-var bulletColor = "#FFCE21";
+var bulletColor = #FFCE21;
 var wallSize = 32;
 
 
@@ -668,18 +612,16 @@ function main() {
         else if(e.keyCode === 39) { rightPressed = false;  level1.getPlayerTank().setRightPressed(false); }
         else if (e.keyCode === 38) { upPressed = false;  level1.getPlayerTank().setUpPressed(false); }
         else if(e.keyCode === 37) { leftPressed = false;  level1.getPlayerTank().setLeftPressed(false); }
-        else if(e.keyCode === 32) { spacePressed = false; level1.getPlayerTank().setSpacePressed(false); }
+        else if(e.keyCode === 32) { spacePressed = false; level1.getPlayerTank().setSpacePressed(false);
     };
 
-    /*
     var keySpaceHandler = function (e) {
         if (e.keyCode === 32) { spacePressed = true; level1.getPlayerTank().setSpacePressed(true);}
     };
-    document.addEventListener("keyspace",keySpaceHandler, false);*/
 
     document.addEventListener("keydown", keyDownHandler, false);
     document.addEventListener("keyup", keyUpHandler, false);
-
+    document.addEventListener("keyspace",keySpaceHandler, false);
 
 
     setInterval(function () {
