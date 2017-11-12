@@ -308,6 +308,7 @@ function UserTank(l, s, img, x, y, v) {
     this._leftPressed = false;
     this._upPressed = false;
     this._downPressed = false;
+    this._spacePressed = false;
 }
 
 /**
@@ -334,6 +335,10 @@ UserTank.prototype.setDownPressed = function (value) {
     this._downPressed = value;
 };
 
+UserTank.prototype.setSpacePressed = function (value) {
+    this._spacePressed = value;
+};
+
 UserTank.prototype.getRightPressed = function () {
     return this._rightPressed;
 };
@@ -349,6 +354,10 @@ UserTank.prototype.getUpPressed = function () {
 UserTank.prototype.getDownPressed = function () {
     return this._downPressed;
 };
+
+UserTank.prototype.getSpacePressed = function () {
+    return this._spacePressed;
+}
 
 UserTank.prototype.collisionDetection = function (c, r, objectArray, sprintSize) {
     var cont = 0;
@@ -509,6 +518,39 @@ Wall.prototype.draw = function (sizeInPx, ctx) {
 
 /*------------------------------ End Wall Class --------------------------------*/
 
+/**
+ *  This object is the ball that the tank will shoot for defeating his enemies.
+ *      @param {boolean} s shooted or not "true/false".
+ *      @param {number} x position in columns.
+ *      @param {number} y position in rows.
+ */
+function Bullet(s, x ,y) {
+    this._status = s;
+    this._x = x;
+    this._y = y;
+}
+
+Bullet.prototype.getX = function () {
+    return this._x;
+};
+
+Bullet.prototype.getY = function () {
+    return this._y;
+};
+
+Bullet.prototype.getStatus = function () {
+    return this._status;
+};
+
+Bullet.prototype.shootingCollision = function () {
+    if((this._x === Wall._x) && (this._y === Wall._y)){
+        Wall.prototype.destroy();
+        this._status = false;
+    }
+}
+
+/*------------------------------ End Bullet Class --------------------------------*/
+
 
 /*------------------------------ Begin of Canvas Functions & Settings --------------------------------*/
 
@@ -518,8 +560,8 @@ var y = 584;
 var dx = -2;
 var dy = -2;
 
-var ballRadius = 12;
-//var ballColor = getRandomColor();
+var bulletRadius = 12;
+var bulletColor = #FFCE21;
 var wallSize = 32;
 
 
@@ -533,15 +575,16 @@ var rightPressed = false;
 var leftPressed = false;
 var upPressed = false;
 var downPressed = false;
+var spacePressed = false;
 
-function getRandomColor() {
+/*function getRandomColor() {
     var letters = '0123456789ABCDEF';
     var color = '#';
     for (var i = 0; i < 6; i++) {
         color += letters[Math.floor(Math.random() * 16)];
     }
     return color;
-}
+}*/
 
 /*------------------------------ End of Canvas Functions & Settings --------------------------------*/
 
@@ -561,6 +604,7 @@ function main() {
         else if(e.keyCode === 39) { rightPressed = true; level1.getPlayerTank().setRightPressed(true); }
         else if (e.keyCode === 38) { upPressed = true; level1.getPlayerTank().setUpPressed(true);}
         else if(e.keyCode === 37) { leftPressed = true;  level1.getPlayerTank().setLeftPressed(true);}
+        else if(e.keyCode === 32) { spacePressed = true; level1.getPlayerTank().setSpacePressed(true); } 
     };
 
     var keyUpHandler = function (e) {
@@ -568,10 +612,16 @@ function main() {
         else if(e.keyCode === 39) { rightPressed = false;  level1.getPlayerTank().setRightPressed(false); }
         else if (e.keyCode === 38) { upPressed = false;  level1.getPlayerTank().setUpPressed(false); }
         else if(e.keyCode === 37) { leftPressed = false;  level1.getPlayerTank().setLeftPressed(false); }
+        else if(e.keyCode === 32) { spacePressed = false; level1.getPlayerTank().setSpacePressed(false);
+    };
+
+    var keySpaceHandler = function (e) {
+        if (e.keyCode === 32) { spacePressed = true; level1.getPlayerTank().setSpacePressed(true);}
     };
 
     document.addEventListener("keydown", keyDownHandler, false);
     document.addEventListener("keyup", keyUpHandler, false);
+    document.addEventListener("keyspace",keySpaceHandler, false);
 
 
     setInterval(function () {
