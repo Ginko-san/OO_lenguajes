@@ -3,7 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="b71b5fa5-0061-4555-bc3a-1776bad3a093" name="Default" comment="">
 <<<<<<< HEAD
+<<<<<<< HEAD
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+=======
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Assets/js/gameScript.js" afterPath="$PROJECT_DIR$/Assets/js/gameScript.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/index.html" afterPath="$PROJECT_DIR$/index.html" />
+>>>>>>> parent of 6b62b0c... Documentation, etc
 =======
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Assets/js/gameScript.js" afterPath="$PROJECT_DIR$/Assets/js/gameScript.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/index.html" afterPath="$PROJECT_DIR$/index.html" />
@@ -81,7 +86,11 @@
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
 <<<<<<< HEAD
+<<<<<<< HEAD
     <option name="x" value="-1921" />
+=======
+    <option name="x" value="-1" />
+>>>>>>> parent of 6b62b0c... Documentation, etc
 =======
     <option name="x" value="-1" />
 >>>>>>> parent of 6b62b0c... Documentation, etc
@@ -182,7 +191,11 @@
       <workItem from="1510244962540" duration="9886000" />
       <workItem from="1510353251371" duration="31542000" />
 <<<<<<< HEAD
+<<<<<<< HEAD
       <workItem from="1510445512944" duration="44080000" />
+=======
+      <workItem from="1510445512944" duration="34059000" />
+>>>>>>> parent of 6b62b0c... Documentation, etc
 =======
       <workItem from="1510445512944" duration="34059000" />
 >>>>>>> parent of 6b62b0c... Documentation, etc
@@ -191,10 +204,17 @@
   </component>
   <component name="TimeTrackingManager">
 <<<<<<< HEAD
+<<<<<<< HEAD
     <option name="totallyTimeSpent" value="103638000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1921" y="-4" width="1922" height="1085" extended-state="6" />
+=======
+    <option name="totallyTimeSpent" value="93617000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-1" y="-4" width="1922" height="1085" extended-state="6" />
+>>>>>>> parent of 6b62b0c... Documentation, etc
 =======
     <option name="totallyTimeSpent" value="93617000" />
   </component>
