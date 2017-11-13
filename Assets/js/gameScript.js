@@ -7,6 +7,8 @@ var pOImage = document.getElementById('primaryObject');
 var pOImage2 = document.getElementById('primaryObject2');
 var playerTankImage = document.getElementById('playerTank');
 var enemyTankImage = document.getElementById('enemyTank');
+var enemyTankImage2 = document.getElementById('enemyTank2');
+var enemyTankImage3 = document.getElementById('enemyTank3');
 
 
 /*-------------------- End Sprites Space ---------------------------*/
@@ -17,18 +19,21 @@ var enemyTankImage = document.getElementById('enemyTank');
  *  The parameters to the constructor :
  *      @param {number} w of wall objects.
  *      @param {number} pO of objectives objects.
+ *      @param {number} e of enemys.
  *      @param {number} c of level Columns.
  *      @param {number} r of level Rows.
  *      @param {number} s of sprites size in pixels.
  *
  *  Default c = 27, r = 22.
  */
-function Level(w, pO, c, r, s) {
+function Level(w, pO, e, c, r, s) {
     this._walls = w;
     this._primaryObjects = pO;
+    this._enemys = e;
     this._columns = c;
     this._rows = r;
     this._spriteSize = s;
+
     this._field = "";
     this._canvas = "";
 
@@ -46,6 +51,49 @@ Level.prototype.getPlayerTank = function () { return this._playerTank; };
  *      @returns {string|*}
  */
 Level.prototype.getField = function () { return this._field; };
+
+Level.prototype.getObjectsArrayFill = function () { return this._objectsArrayFill; };
+
+Level.prototype.addEnemyTank = function (value) {
+    this._enemyTankArray.push(value);
+};
+
+Level.prototype.removeDestroyedEnemys = function () {
+    this._enemyTankArray.forEach(function (e, i, a) {
+        if (!e.getStatus()) {
+            a.splice(i, 1);
+        }
+    });
+};
+
+Level.prototype.drawEnemyTanks = function (ctx, c, r, objectArray, spriteSize, canvas) {
+    this._enemyTankArray.forEach(function (e, i, a) {
+        if (e.getStatus()) {
+            var move = Math.floor((Math.random() * 2));
+            e.draw(1, ctx);
+            if (move === 1) { e.walk(c, r, objectArray, spriteSize, canvas); }
+        }
+    });
+};
+
+Level.prototype.addRandomEnemy = function () {
+    var x = Math.floor((Math.random() * (this._columns - 2)) + 1);
+    var y = Math.floor((Math.random() * (this._rows - 2)) + 1);
+    var randomTank = Math.floor((Math.random() * 3) + 1);
+
+    var place = (y * this._columns) + x;
+    if (!this._objectsArrayFill[place]._status) {
+        if (randomTank === 1)
+        {
+            this.addEnemyTank(new EnemyTank(4, true, enemyTankImage, x * 32, y *32, 32, randomTank)); // Enemy tank with strong full life
+        } else if (randomTank === 2)
+        {
+            this.addEnemyTank(new EnemyTank(2, true, enemyTankImage2, x * 32, y *32, 32, randomTank)); // Enemy tank with medium life and strong shoot
+        } else {
+            this.addEnemyTank(new EnemyTank(1, true, enemyTankImage3, x * 32, y *32, 32, randomTank)); // Enemy tank with teleport power
+        }
+    }
+};
 
 /**
  *  Initialize a _canvas & _field variables
@@ -117,6 +165,62 @@ Level.prototype.placePrimaryObjectives = function () {
             }
         }
     }
+};
+
+Level.prototype.placeEnemyTanks = function () {
+    var tanks = Math.floor(this._enemys * 0.15);
+    var rest = this._enemys - (tanks * 3);
+    var y = 0;
+    var x = 0;
+    var place = 0;
+
+    for (var i = 1; i < 4; i++) {
+        for (var j = 0; j < tanks; j++) {
+            while (true) {
+                x = Math.floor((Math.random() * (this._columns - 2)) + 1);
+                y = Math.floor((Math.random() * (this._rows - 2)) + 1);
+
+                place = (y * this._columns) + x;
+
+                if (!this._objectsArrayFill[place]._status) {
+                    if (i === 1)
+                    {
+                        this.addEnemyTank(new EnemyTank(4, true, enemyTankImage, x * 32, y *32, 32, i)); // Enemy tank with strong full life
+                    } else if (i === 2)
+                    {
+                        this.addEnemyTank(new EnemyTank(2, true, enemyTankImage2, x * 32, y *32, 32, i)); // Enemy tank with medium life and strong shoot
+                    } else {
+                        this.addEnemyTank(new EnemyTank(1, true, enemyTankImage3, x * 32, y *32, 32, i)); // Enemy tank with teleport power
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    for (var l = 0; l < rest; l++) {
+        while (true) {
+            x = Math.floor((Math.random() * (this._columns - 2)) + 1);
+            y = Math.floor((Math.random() * (this._rows - 2)) + 1);
+            var randomTank = Math.floor((Math.random() * 3) + 1);
+
+            place = (y * this._columns) + x;
+
+            if (!this._objectsArrayFill[place]._status) {
+                if (randomTank === 1)
+                {
+                    this.addEnemyTank(new EnemyTank(4, true, enemyTankImage, x * 32, y *32, 32, randomTank)); // Enemy tank with strong full life
+                } else if (randomTank === 2)
+                {
+                    this.addEnemyTank(new EnemyTank(2, true, enemyTankImage2, x * 32, y *32, 32, randomTank)); // Enemy tank with medium life and strong shoot
+                } else {
+                    this.addEnemyTank(new EnemyTank(1, true, enemyTankImage3, x * 32, y *32, 32, randomTank)); // Enemy tank with teleport power
+                }
+                break;
+            }
+        }
+    }
+
 };
 
 /**
@@ -206,11 +310,14 @@ Level.prototype.drawInField = function () {
     this._primaryObjects = this.updatePrimaryObjectiveQuantity(this._primaryObjects);
 
     this.drawObjectsInField();
+    this.drawEnemyTanks(this._field, this._columns, this._rows, this._objectsArrayFill, this._spriteSize, this._canvas);
     this._playerTank.draw(1, this._field);
     this._playerTank.drawBullets(this._field);
+
     this.bulletCollisionDetection(this._playerTank.getFiredBullets(), this._columns, this._rows, this._objectsArrayFill, this._primaryObjects);
+
     this._playerTank.removeDestroyedBullets();
-    //this.collisionDetection();
+    this.removeDestroyedEnemys();
 
     this._playerTank.walk(this._columns, this._rows, this._objectsArrayFill, this._spriteSize, this._canvas);
 
@@ -220,7 +327,7 @@ Level.prototype.drawInField = function () {
 
     if (this._primaryObjects === 0) {
         alert("You Win!");
-        window.location.href += "?timesWon=1";
+        //window.location.href += "?timesWon=1";
         document.location.reload();
         //stopLevel = true;
     }
@@ -280,23 +387,21 @@ Tank.prototype.getVelocity = function () { return this._velocity; };
 
 Tank.prototype.getFiredBullets = function () { return this._firedBullets; };
 
+Tank.prototype.getStatus = function () { return this._status; };
+
 Tank.prototype.setX = function (value) { this._x += value; };
 
 Tank.prototype.setY = function (value) { this._y += value; };
 
 Tank.prototype.setLife = function (value) { this._life = value; };
 
-Tank.prototype.walk = function () {
-    Console.log("Walking.");
-};
+Tank.prototype.walk = function () { Console.log("Walking."); };
 
-Tank.prototype.fire = function () {
-    Console.log("Shooting.");
-};
+Tank.prototype.fire = function () { Console.log("Shooting."); };
 
-Tank.prototype.speedUp = function () {
-    Console.log("Speeding Up.");
-};
+Tank.prototype.speedUp = function () { Console.log("Speeding Up."); };
+
+Tank.prototype.collisionDetection = function () { Console.log("Paoh..."); };
 
 Tank.prototype.loseLife = function (hitSize) {
     this._life -= hitSize;
@@ -469,11 +574,14 @@ UserTank.prototype.fire = function () {
  *      @param {number} x position in columns.
  *      @param {number} y position in rows.
  *      @param {number} v velocity of the tank.
+ *      @param {number} t type of the tank.
  *
  *  The methods change between it & the user tank. (the same name, but different actions)
  */
-function EnemyTank(l, s, img, x, y, v) {
+function EnemyTank(l, s, img, x, y, v, t) {
     Tank.call(this, l, s, img, x, y, v);
+
+    this._type = t;
 }
 
 /**
@@ -484,6 +592,55 @@ EnemyTank.prototype = Object.create(Tank.prototype);
 
 EnemyTank.prototype.constructor = EnemyTank;  // Setting the 'constructor' property for EnemyTank references.
 
+EnemyTank.prototype.getType = function () { return this._type; };
+
+EnemyTank.prototype.collisionDetection = function (c, r, objectArray, sprintSize) {
+    var cont = 0;
+    var placeTank = Math.round(((this._y / sprintSize) * c) + (this._x / sprintSize));
+
+    var placeUp = placeTank - c;
+    var placeDown = placeTank + c;
+    var placeRight = placeTank + 1;
+    var placeLeft = placeTank - 1;
+
+    var coll = { Up: false,
+        Down: false,
+        Left: false,
+        Right: false,
+        NoColl: false
+    };
+
+    if (objectArray[placeUp]._status) {
+        if (this._y <= (objectArray[placeUp].getY()*sprintSize) + sprintSize) { coll.Up = true; cont++; }
+    }
+    if (objectArray[placeDown]._status) {
+        if (this._y + sprintSize >= (objectArray[placeDown].getY()*sprintSize)) { coll.Down = true; cont++; }
+    }
+    if (objectArray[placeLeft]._status) {
+        if (this._x <= (objectArray[placeLeft].getX()*sprintSize)+ sprintSize) { coll.Left = true; cont++; }
+    }
+    if (objectArray[placeRight]._status) {
+        if (this._x + sprintSize >= (objectArray[placeRight].getX()*sprintSize)) { coll.Right = true; cont++; }
+    }
+    if (cont === 0) { coll.NoColl = true; }
+
+    return coll;
+};
+
+EnemyTank.prototype.walk = function (c, r, objectArray, spriteSize, canvas) {
+    var coll = this.collisionDetection(c, r, objectArray, spriteSize);
+    var dir = Math.floor((Math.random() * 5));
+
+    if(dir === 1 && this.getX() < canvas.width-(spriteSize * 2)) {
+        if (!coll.Right) { this.setX(this.getVelocity()); }
+    } else if(dir === 2 && this.getX() > spriteSize) {
+        if (!coll.Left) { this.setX(-this.getVelocity()); }
+    } else if(dir === 3 && this.getY() < canvas.height-(spriteSize * 2)) {
+        if (!coll.Down) { this.setY(this.getVelocity()); }
+    } else if(dir === 4 && this.getY() > spriteSize) {
+        if (!coll.Up) { this.setY(-this.getVelocity()); }
+    }
+};
 
 /*------------------------------ End Enemy Tank Class --------------------------------*/
 
@@ -566,7 +723,7 @@ Wall.prototype.draw = function (sizeInPx, ctx) {
 Wall.prototype.loseLife = function (hitSize) {
     this._life -= hitSize;
     this._status = (this._life !== 0);
-    console.log((this._status) ? "Losing life." : "Dead.");
+    console.log((this._status) ? "Losing life." : "Destroyed.");
 };
 
 /*------------------------------ End Wall Class --------------------------------*/
@@ -675,20 +832,29 @@ function main() {
     document.addEventListener("keyup", keyUpHandler, false);
 
     var timesWon = 0;
+    var time = 0;
 
-    var level1 = new Level(100, 5, 27, 22, 32);
+    var level1 = new Level(120, 5, 5, 27, 22, 32);
     level1.initField();
     level1.initObjectArray();
     level1.placeObjects(); // put all the _walls in place
     level1.placePrimaryObjectives(); // put all the _primaryObjects in place
     level1.placePlayerTank();  // put the playerTank in place
 
-    
+    level1.placeEnemyTanks();  // put the enemys in place
+
+
     var firstLevel = setInterval(function () {
         level1.drawInField();
+        if (time % 5000 === 0) {
+            console.log("Put Tank");
+            level1.addRandomEnemy();
+        }
+
         if (stopLevel) {
             clearInterval(firstLevel);
         }
+        time += 100;
     }, 100);
 
 
