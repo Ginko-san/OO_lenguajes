@@ -10,6 +10,8 @@ var enemyTankImage = document.getElementById('enemyTank');
 var enemyTankImage2 = document.getElementById('enemyTank2');
 var enemyTankImage3 = document.getElementById('enemyTank3');
 
+var playerLivesBannes = document.getElementById('PlayerLives');
+
 
 /*-------------------- End Sprites Space ---------------------------*/
 
@@ -66,12 +68,15 @@ Level.prototype.removeDestroyedEnemys = function () {
     });
 };
 
-Level.prototype.drawEnemyTanks = function (ctx, c, r, objectArray, spriteSize, canvas) {
+Level.prototype.drawEnemyTanks = function (ctx, c, r, objectArray, spriteSize, canvas, playerTank) {
     this._enemyTankArray.forEach(function (e, i, a) {
         if (e.getStatus()) {
-            var move = Math.floor((Math.random() * 2));
+            var move = Math.floor((Math.random() * 8));
             e.draw(1, ctx);
-            if (move === 1) { e.walk(c, r, objectArray, spriteSize, canvas); }
+            e.drawBullets(ctx);
+
+            if (move === 3) { e.walk(c, r, objectArray, spriteSize, canvas); }
+            e.fire(playerTank);
         }
     });
 };
@@ -190,7 +195,7 @@ Level.prototype.placeEnemyTanks = function () {
                     {
                         this.addEnemyTank(new EnemyTank(2, true, enemyTankImage2, x * 32, y *32, 32, i)); // Enemy tank with medium life and strong shoot
                     } else {
-                        this.addEnemyTank(new EnemyTank(1, true, enemyTankImage3, x * 32, y *32, 32, i)); // Enemy tank with teleport power
+                        this.addEnemyTank(new EnemyTank(1, true, enemyTankImage3, x * 32, y *32, 32, i)); // Enemy tank with normal power
                     }
                     break;
                 }
@@ -214,7 +219,7 @@ Level.prototype.placeEnemyTanks = function () {
                 {
                     this.addEnemyTank(new EnemyTank(2, true, enemyTankImage2, x * 32, y *32, 32, randomTank)); // Enemy tank with medium life and strong shoot
                 } else {
-                    this.addEnemyTank(new EnemyTank(1, true, enemyTankImage3, x * 32, y *32, 32, randomTank)); // Enemy tank with teleport power
+                    this.addEnemyTank(new EnemyTank(1, true, enemyTankImage3, x * 32, y *32, 32, randomTank)); // Enemy tank with normal power
                 }
                 break;
             }
@@ -271,7 +276,7 @@ Level.prototype.collisionDetection = function () {
     }
 };
 
-Level.prototype.bulletCollisionDetection = function (bulletArray, c, r, objectsArray, pO) {
+Level.prototype.bulletCollisionDetection = function (bulletArray, c, r, objectsArray, enemyArray) {
     bulletArray.forEach(function (e, i, a) {
         var place = ((e.getY()/32) * c) + (e.getX()/32);
 
@@ -280,13 +285,43 @@ Level.prototype.bulletCollisionDetection = function (bulletArray, c, r, objectsA
         } else if (objectsArray[place]._status) {
             e.destroy();
             objectsArray[place].loseLife(1);
-            //objectsArray[place]._status = false;
-        } else {
-            if (e.getDirection() === 1) { e.setY(-e.getVelocity()); }
-            else if (e.getDirection() === 2) { e.setY(e.getVelocity()); }
-            else if (e.getDirection() === 3) { e.setX(-e.getVelocity()); }
-            else if (e.getDirection() === 4) { e.setX(e.getVelocity()); }
         }
+
+        enemyArray.forEach(function (e1, i1, a1) {
+            var enemyPlace = ((e1.getY()/32) * c) + (e1.getX()/32);
+            if (enemyPlace === place) {
+                e.destroy();
+                e1.loseLife(1);
+            }
+        });
+
+        if (e.getDirection() === 1) { e.setY(-e.getVelocity()); }
+        else if (e.getDirection() === 2) { e.setY(e.getVelocity()); }
+        else if (e.getDirection() === 3) { e.setX(-e.getVelocity()); }
+        else if (e.getDirection() === 4) { e.setX(e.getVelocity()); }
+
+    });
+};
+
+Level.prototype.enemyBulletCollisionDetection = function (bulletArray, c, r, playerTank, objectsArray) {
+    bulletArray.forEach(function (e, i, a) {
+        var place = ((e.getY()/32) * c) + (e.getX()/32);
+        var playerPlace = ((playerTank.getY()/32) * c) + (playerTank.getX()/32);
+
+        if ( place < c || place >= (c * (r -1)) || place % c === 0 ){
+            e.destroy();
+        } else if (objectsArray[place]._status) {
+            e.destroy();
+        } else if (playerPlace === place) {
+            e.destroy();
+            playerTank.loseLife(1);
+        }
+
+        if (e.getDirection() === 1) { e.setY(-e.getVelocity()); }
+        else if (e.getDirection() === 2) { e.setY(e.getVelocity()); }
+        else if (e.getDirection() === 3) { e.setX(-e.getVelocity()); }
+        else if (e.getDirection() === 4) { e.setX(e.getVelocity()); }
+
     });
 };
 
@@ -310,11 +345,20 @@ Level.prototype.drawInField = function () {
     this._primaryObjects = this.updatePrimaryObjectiveQuantity(this._primaryObjects);
 
     this.drawObjectsInField();
-    this.drawEnemyTanks(this._field, this._columns, this._rows, this._objectsArrayFill, this._spriteSize, this._canvas);
+    this.drawEnemyTanks(this._field, this._columns, this._rows, this._objectsArrayFill, this._spriteSize, this._canvas, this._playerTank);
     this._playerTank.draw(1, this._field);
     this._playerTank.drawBullets(this._field);
 
-    this.bulletCollisionDetection(this._playerTank.getFiredBullets(), this._columns, this._rows, this._objectsArrayFill, this._primaryObjects);
+    this.bulletCollisionDetection(this._playerTank.getFiredBullets(), this._columns, this._rows, this._objectsArrayFill, this._enemyTankArray);
+
+    for (var i = 0; i < this._enemyTankArray.length; i++) {
+        this.enemyBulletCollisionDetection(this._enemyTankArray[i].getFiredBullets(), this._columns, this._rows, this._playerTank, this._objectsArrayFill);
+        this._enemyTankArray[i].removeDestroyedBullets();
+    }
+    /*
+    this._enemyTankArray.forEach(function (e, i, a) {
+        this.enemyBulletCollisionDetection(e.getFiredBullets(), this._columns, this._rows, this._playerTank);
+    });*/
 
     this._playerTank.removeDestroyedBullets();
     this.removeDestroyedEnemys();
@@ -330,6 +374,11 @@ Level.prototype.drawInField = function () {
         //window.location.href += "?timesWon=1";
         document.location.reload();
         //stopLevel = true;
+    }
+
+    if (this._playerTank.getLife() <= 0) {
+        alert("You Lose! Press Ok to play again!");
+        document.location.reload();
     }
 
 };
@@ -383,6 +432,8 @@ Tank.prototype.getX = function () { return this._x; };
 
 Tank.prototype.getY = function () { return this._y; };
 
+Tank.prototype.getLife = function () { return this._life; };
+
 Tank.prototype.getVelocity = function () { return this._velocity; };
 
 Tank.prototype.getFiredBullets = function () { return this._firedBullets; };
@@ -406,7 +457,7 @@ Tank.prototype.collisionDetection = function () { Console.log("Paoh..."); };
 Tank.prototype.loseLife = function (hitSize) {
     this._life -= hitSize;
     this._status = (this._life !== 0);
-    console.log("Losing life.");
+    console.log((this._status) ? "Losing life." : "Dead.");
 };
 
 Tank.prototype.collision = function () {
@@ -562,6 +613,13 @@ UserTank.prototype.fire = function () {
     }
 };
 
+UserTank.prototype.loseLife = function (hitSize) {
+    this._life -= hitSize;
+    this._status = (this._life !== 0);
+    console.log((this._status) ? "Losing life." : "Dead.");
+    playerLivesBannes.innerHTML = this._life + "";
+};
+
 
 /*------------------------------ End User Tank Class --------------------------------*/
 
@@ -628,8 +686,9 @@ EnemyTank.prototype.collisionDetection = function (c, r, objectArray, sprintSize
 };
 
 EnemyTank.prototype.walk = function (c, r, objectArray, spriteSize, canvas) {
-    var coll = this.collisionDetection(c, r, objectArray, spriteSize);
     var dir = Math.floor((Math.random() * 5));
+
+    var coll = this.collisionDetection(c, r, objectArray, spriteSize);
 
     if(dir === 1 && this.getX() < canvas.width-(spriteSize * 2)) {
         if (!coll.Right) { this.setX(this.getVelocity()); }
@@ -639,6 +698,18 @@ EnemyTank.prototype.walk = function (c, r, objectArray, spriteSize, canvas) {
         if (!coll.Down) { this.setY(this.getVelocity()); }
     } else if(dir === 4 && this.getY() > spriteSize) {
         if (!coll.Up) { this.setY(-this.getVelocity()); }
+    }
+};
+
+EnemyTank.prototype.fire = function (playerTank) {
+    if (playerTank.getX() === this.getX() && playerTank.getY() < this.getY()){
+        this.addFiredBullet(new Bullet(true, this.getX(), this.getY(), 32, 1));
+    } else if (playerTank.getX() === this.getX() && playerTank.getY() > this.getY()) {
+        this.addFiredBullet(new Bullet(true, this.getX(), this.getY(), 32, 2));
+    } else if (playerTank.getY() === this.getY() && playerTank.getX() < this.getX()) {
+        this.addFiredBullet(new Bullet(true, this.getX(), this.getY(), 32, 3));
+    } else if (playerTank.getY() === this.getY() && playerTank.getX() > this.getX()) {
+        this.addFiredBullet(new Bullet(true, this.getX(), this.getY(), 32, 4));
     }
 };
 
