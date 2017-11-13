@@ -4,6 +4,7 @@
 
 var wallImage = document.getElementById('wall');
 var pOImage = document.getElementById('primaryObject');
+var pOImage2 = document.getElementById('primaryObject2');
 var playerTankImage = document.getElementById('playerTank');
 var enemyTankImage = document.getElementById('enemyTank');
 
@@ -28,17 +29,23 @@ function Level(w, pO, c, r, s) {
     this._columns = c;
     this._rows = r;
     this._spriteSize = s;
-    this._objectsArrayFill = [];
     this._field = "";
     this._canvas = "";
 
     this._playerTank = 1;
+    this._objectsArrayFill = [];
+    this._enemyTankArray = [];
+
 
 }
 
-Level.prototype.getPlayerTank = function () {
-    return this._playerTank;
-};
+Level.prototype.getPlayerTank = function () { return this._playerTank; };
+
+/**
+ *  Return _field variable
+ *      @returns {string|*}
+ */
+Level.prototype.getField = function () { return this._field; };
 
 /**
  *  Initialize a _canvas & _field variables
@@ -50,14 +57,6 @@ Level.prototype.initField = function () {
 
     this._canvas.width = "" + (this._columns * this._spriteSize);
     this._canvas.height = "" + (this._rows * this._spriteSize);
-};
-
-/**
- *  Return _field variable
- *      @returns {string|*}
- */
-Level.prototype.getField = function () {
-    return this._field;
 };
 
 /**
@@ -81,10 +80,8 @@ Level.prototype.initObjectArray = function () {
  *                                      1 = PrimaryObject.
  *                                      2 = Wall.
  */
-Level.prototype.placeObjects = function (typeObject) {
-    var nObjects = (typeObject === 1) ? this._primaryObjects : this._walls;
-
-    for (var i = 0; i < nObjects; i++) {
+Level.prototype.placeObjects = function () {
+    for (var i = 0; i < this._walls; i++) {
         while (true) {
             var x = Math.floor((Math.random() * (this._columns - 2)) + 1);
             var y = Math.floor((Math.random() * (this._rows - 2)) + 1);
@@ -92,9 +89,30 @@ Level.prototype.placeObjects = function (typeObject) {
             var place = (y * this._columns) + x;
 
             if (!this._objectsArrayFill[place]._status) {
-                this._objectsArrayFill[place] = (typeObject === 1) ?
-                    new Objective(1, true, pOImage, x, y) :
-                    new Wall(true, wallImage, x, y);
+                this._objectsArrayFill[place] = new Wall(1, true, wallImage, x, y);
+                break;
+            }
+        }
+    }
+};
+
+Level.prototype.placePrimaryObjectives = function () {
+    var specialObjective = Math.floor((Math.random() * (this._primaryObjects - 2)) + 1);
+
+    for (var i = 0; i < this._primaryObjects; i++) {
+        while (true) {
+            var x = Math.floor((Math.random() * (this._columns - 2)) + 1);
+            var y = Math.floor((Math.random() * (this._rows - 2)) + 1);
+
+            var place = (y * this._columns) + x;
+
+            if (!this._objectsArrayFill[place]._status) {
+                if (specialObjective !== 0) {
+                    this._objectsArrayFill[place] = new Objective(3, true, pOImage2, x, y);
+                    specialObjective--;
+                } else {
+                    this._objectsArrayFill[place] = new Objective(1, true, pOImage, x, y);
+                }
                 break;
             }
         }
@@ -132,27 +150,6 @@ Level.prototype.drawObjectsInField = function () {
     }
 };
 
-// function to delete, only for testing purposes
-Level.prototype.drawBall = function () {
-    this._field.beginPath();
-
-    this._field.arc(x, y, ballRadius, 0, Math.PI*2);
-    this._field.fillStyle = "#0095DD";
-    this._field.fill();
-
-    this._field.closePath();
-};
-
-Level.prototype.drawPaddle = function () {
-    this._field.beginPath();
-
-    this._field.rect(paddleX, this._canvas.height-paddleHeight*3.3, paddleWidth, paddleHeight);
-    this._field.fillStyle = "#0095DD";
-    this._field.fill();
-
-    this._field.closePath();
-};
-
 Level.prototype.collisionDetection = function () {
     var cont = this._columns * this._rows;
 
@@ -170,7 +167,7 @@ Level.prototype.collisionDetection = function () {
     }
 };
 
-Level.prototype.bulletCollisionDetection = function (bulletArray, c, r, objectsArray) {
+Level.prototype.bulletCollisionDetection = function (bulletArray, c, r, objectsArray, pO) {
     bulletArray.forEach(function (e, i, a) {
         var place = ((e.getY()/32) * c) + (e.getX()/32);
 
@@ -178,7 +175,8 @@ Level.prototype.bulletCollisionDetection = function (bulletArray, c, r, objectsA
             e.destroy();
         } else if (objectsArray[place]._status) {
             e.destroy();
-            objectsArray[place]._status = false;
+            objectsArray[place].loseLife(1);
+            //objectsArray[place]._status = false;
         } else {
             if (e.getDirection() === 1) { e.setY(-e.getVelocity()); }
             else if (e.getDirection() === 2) { e.setY(e.getVelocity()); }
@@ -188,47 +186,45 @@ Level.prototype.bulletCollisionDetection = function (bulletArray, c, r, objectsA
     });
 };
 
+Level.prototype.updatePrimaryObjectiveQuantity = function (actualQuantity) {
+    var cont = 0;
+
+    this._objectsArrayFill.forEach(function (e, i, a) {
+        if (e instanceof Objective)
+        {
+            cont += (e.getStatus()) ? 1 : 0;
+            if (cont === actualQuantity) { return cont; }
+        }
+    });
+    return cont;
+};
+
+
 Level.prototype.drawInField = function () {
     this._field.clearRect(0, 0, this._canvas.width, this._canvas.height); // This line clear the canvas every 10 ms
+
+    this._primaryObjects = this.updatePrimaryObjectiveQuantity(this._primaryObjects);
 
     this.drawObjectsInField();
     this._playerTank.draw(1, this._field);
     this._playerTank.drawBullets(this._field);
-    this.bulletCollisionDetection(this._playerTank.getFiredBullets(), this._columns, this._rows, this._objectsArrayFill);
+    this.bulletCollisionDetection(this._playerTank.getFiredBullets(), this._columns, this._rows, this._objectsArrayFill, this._primaryObjects);
     this._playerTank.removeDestroyedBullets();
-    //this.drawBall();
-    //this.drawPaddle();
     //this.collisionDetection();
 
+    this._playerTank.walk(this._columns, this._rows, this._objectsArrayFill, this._spriteSize, this._canvas);
 
-    var coll = this._playerTank.collisionDetection(this._columns, this._rows, this._objectsArrayFill, this._spriteSize);
+    this._playerTank.fire();
 
-    if(this._playerTank.getRightPressed() && this._playerTank.getX() < this._canvas.width-(this._spriteSize * 2)) {
-        if (!coll.Right) { this._playerTank.setX(this._playerTank.getVelocity()); }
-    } else if(this._playerTank.getLeftPressed() && this._playerTank.getX() > this._spriteSize) {
-        if (!coll.Left) { this._playerTank.setX(-this._playerTank.getVelocity()); }
-    } else if(this._playerTank.getDownPressed() && this._playerTank.getY() < this._canvas.height-(this._spriteSize * 2)) {
-        if (!coll.Down) { this._playerTank.setY(this._playerTank.getVelocity()); }
-    } else if(this._playerTank.getUpPressed() && this._playerTank.getY() > this._spriteSize) {
-        if (!coll.Up) { this._playerTank.setY(-this._playerTank.getVelocity()); }
+
+
+    if (this._primaryObjects === 0) {
+        alert("You Win!");
+        window.location.href += "?timesWon=1";
+        document.location.reload();
+        //stopLevel = true;
     }
 
-    if (this._playerTank.getSpacePressed()) {
-        if (this._playerTank.getBulletRightPressed()) {
-            this._playerTank.addFiredBullet(new Bullet(true, this._playerTank.getX(), this._playerTank.getY(), 32, 4));
-        } else if (this._playerTank.getBulletLeftPressed()) {
-            this._playerTank.addFiredBullet(new Bullet(true, this._playerTank.getX(), this._playerTank.getY(), 32, 3));
-        } else if (this._playerTank.getBulletUpPressed()) {
-            this._playerTank.addFiredBullet(new Bullet(true, this._playerTank.getX(), this._playerTank.getY(), 32, 1));
-        } else if (this._playerTank.getBulletDownPressed()) {
-            this._playerTank.addFiredBullet(new Bullet(true, this._playerTank.getX(), this._playerTank.getY(), 32, 2));
-        }
-    }
-
-
-
-    //x += dx;
-    //y += dy;
 };
 
 /*------------------------------ End Level Class --------------------------------*/
@@ -276,29 +272,19 @@ Tank.prototype.drawBullets = function (ctx) {
     });
 };
 
-Tank.prototype.getX = function () {
-    return this._x;
-};
+Tank.prototype.getX = function () { return this._x; };
 
-Tank.prototype.getY = function () {
-    return this._y;
-};
+Tank.prototype.getY = function () { return this._y; };
 
-Tank.prototype.getVelocity = function () {
-    return this._velocity;
-};
+Tank.prototype.getVelocity = function () { return this._velocity; };
 
-Tank.prototype.getFiredBullets = function () {
-    return this._firedBullets;
-};
+Tank.prototype.getFiredBullets = function () { return this._firedBullets; };
 
-Tank.prototype.setX = function (value) {
-    this._x += value;
-};
+Tank.prototype.setX = function (value) { this._x += value; };
 
-Tank.prototype.setY = function (value) {
-    this._y += value;
-};
+Tank.prototype.setY = function (value) { this._y += value; };
+
+Tank.prototype.setLife = function (value) { this._life = value; };
 
 Tank.prototype.walk = function () {
     Console.log("Walking.");
@@ -310,11 +296,6 @@ Tank.prototype.fire = function () {
 
 Tank.prototype.speedUp = function () {
     Console.log("Speeding Up.");
-};
-
-Tank.prototype.setLife = function (l) {
-    this._life = l;
-    console.log("Established life");
 };
 
 Tank.prototype.loseLife = function (hitSize) {
@@ -448,7 +429,33 @@ UserTank.prototype.collisionDetection = function (c, r, objectArray, sprintSize)
     return coll;
 };
 
+UserTank.prototype.walk = function (c, r, objectArray, spriteSize, canvas) {
+    var coll = this.collisionDetection(c, r, objectArray, spriteSize);
 
+    if(this.getRightPressed() && this.getX() < canvas.width-(spriteSize * 2)) {
+        if (!coll.Right) { this.setX(this.getVelocity()); }
+    } else if(this.getLeftPressed() && this.getX() > spriteSize) {
+        if (!coll.Left) { this.setX(-this.getVelocity()); }
+    } else if(this.getDownPressed() && this.getY() < canvas.height-(spriteSize * 2)) {
+        if (!coll.Down) { this.setY(this.getVelocity()); }
+    } else if(this.getUpPressed() && this.getY() > spriteSize) {
+        if (!coll.Up) { this.setY(-this.getVelocity()); }
+    }
+};
+
+UserTank.prototype.fire = function () {
+    if (this.getSpacePressed()) {
+        if (this.getBulletRightPressed()) {
+            this.addFiredBullet(new Bullet(true, this.getX(), this.getY(), 32, 4));
+        } else if (this.getBulletLeftPressed()) {
+            this.addFiredBullet(new Bullet(true, this.getX(), this.getY(), 32, 3));
+        } else if (this.getBulletUpPressed()) {
+            this.addFiredBullet(new Bullet(true, this.getX(), this.getY(), 32, 1));
+        } else if (this.getBulletDownPressed()) {
+            this.addFiredBullet(new Bullet(true, this.getX(), this.getY(), 32, 2));
+        }
+    }
+};
 
 
 /*------------------------------ End User Tank Class --------------------------------*/
@@ -523,12 +530,14 @@ Objective.prototype.draw = function (sizeInPx, ctx) {
 
 /**
  *  Well, this object is the walls. Nothing to do xD.
+ *      @param {number} l
  *      @param {boolean} s
  *      @param {Image} img
  *      @param {number} x
  *      @param {number} y
  */
-function Wall(s, img, x, y) {
+function Wall(l, s, img, x, y) {
+    this._life = l;
     this._status = s;
     this._objectSprint = img;
     this._x = x;
@@ -552,6 +561,12 @@ Wall.prototype.draw = function (sizeInPx, ctx) {
         ctx.fill();
         ctx.closePath();
     }
+};
+
+Wall.prototype.loseLife = function (hitSize) {
+    this._life -= hitSize;
+    this._status = (this._life !== 0);
+    console.log((this._status) ? "Losing life." : "Dead.");
 };
 
 /*------------------------------ End Wall Class --------------------------------*/
@@ -621,41 +636,17 @@ var bulletRadius = 12;
 var bulletColor = "#FFCE21";
 var wallSize = 32;
 
+var stopLevel = false;
 
-//paddle vars
-var paddleHeight = 10;
-var paddleWidth = 75;
-var paddleX = 395;
-
-// Bottoms
-var rightPressed = false;
-var leftPressed = false;
-var upPressed = false;
-var downPressed = false;
-var spacePressed = false;
-
-/*function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}*/
+var timesWon = 0;
 
 /*------------------------------ End of Canvas Functions & Settings --------------------------------*/
 
 /**
  *  Main function
  */
-function main() {
-    var level1 = new Level(100, 3, 27, 22, 32);
-    level1.initField();
-    level1.initObjectArray();
-    level1.placeObjects(1); // put all the _walls in place
-    level1.placeObjects(2); // put all the _primaryObjects in place
-    level1.placePlayerTank();  // put the playerTank in place
 
+function main() {
     var keyDownHandler  = function (e) {
         if (e.keyCode === 40) { level1.getPlayerTank().setDownPressed(true); }
         else if(e.keyCode === 39) { level1.getPlayerTank().setRightPressed(true); }
@@ -683,17 +674,24 @@ function main() {
     document.addEventListener("keydown", keyDownHandler, false);
     document.addEventListener("keyup", keyUpHandler, false);
 
-    /*
-    var keySpaceHandler = function (e) {
-        if (e.keyCode === 32) { spacePressed = true; level1.getPlayerTank().setSpacePressed(true);}
-    };
-    document.addEventListener("keyspace",keySpaceHandler, false);
-    */
+    var timesWon = 0;
 
+    var level1 = new Level(100, 5, 27, 22, 32);
+    level1.initField();
+    level1.initObjectArray();
+    level1.placeObjects(); // put all the _walls in place
+    level1.placePrimaryObjectives(); // put all the _primaryObjects in place
+    level1.placePlayerTank();  // put the playerTank in place
 
-    setInterval(function () {
+    
+    var firstLevel = setInterval(function () {
         level1.drawInField();
+        if (stopLevel) {
+            clearInterval(firstLevel);
+        }
     }, 100);
+
+
 }
 
 main();
